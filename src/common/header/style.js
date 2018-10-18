@@ -129,6 +129,7 @@ export const SearchInfo = styled.div `
   left: 0;
   padding: 0 20px;
   box-shadow: 0 0 8px rgba(0,0,0,.2);
+  background: white;
  
 `
 export const SearchInfoTitle = styled.div `
@@ -151,6 +152,7 @@ export const SearchInfoSwitch = styled.span `
     float: left;
     font-size: 12px;
     margin-right: 4px;
+    margin-top: 3px;
     transition: all .3s ease-in;
     transform: rotate(0deg);
     transform-origin: center center;

@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import {actionCreators}   from './store'
+import {Link} from 'react-router-dom'
+import { actionCreators as loginActionCreators } from '../../pages/login/store'
 import {CSSTransition} from 'react-transition-group'
 import {
   HeaderWrapper,
@@ -20,15 +22,20 @@ import {
 
 class Header extends PureComponent {
   render () {
-    const { focused, handleFocused, handleBlur, list } = this.props
+    const { focused, handleFocused, handleBlur, list, login } = this.props
     return (
       <HeaderWrapper>
+        <Link to='/'>
           <Logo/>
+        </Link>
         <Nav>
           <NavItem className='left active'>首页</NavItem>
           <NavItem className='left'>下载App</NavItem>
-            <NavItem className='right'>退出</NavItem>
-             <NavItem className='right'>登陆</NavItem>
+          {
+            login ? <NavItem className='right' onClick={this.props.logout}>退出</NavItem>
+              :<Link to='/login'><NavItem className='right'>登陆</NavItem></Link>
+
+          }
           <NavItem className='right'>
             <svg className="icon" aria-hidden="true">
               <use xlinkHref="#icon-Aa"></use>
@@ -53,37 +60,41 @@ class Header extends PureComponent {
           </SearchWrapper>
         </Nav>
         <Addition>
-          <Button className='writing'>
-            <svg className="icon">
-            <use xlinkHref="#icon-pencil2"></use>
-            </svg>
-              写文章
-            </Button>
+          <Link to='/write'>
+            <Button className='writing'>
+              <svg className="icon">
+              <use xlinkHref="#icon-pencil2"></use>
+              </svg>
+                写文章
+              </Button>
+          </Link>
           <Button className='reg'>注册</Button>
         </Addition>
       </HeaderWrapper>
     )
   }
   getListArea () {
-    const { focused, list, page, totalPage, handleMouseEnter,
-      handleMouseLeave, mouseEnter, handleChangePage } = this.props
-    const pageList = []
+    const { focused, list, page,
+      totalPage, handleMouseEnter, handleMouseLeave,
+      mouseEnter, handleChangePage} = this.props
+    const pushList = []
     const newList = list.toJS()
     if (newList.length) {
-      for (let i = (page-1)*10;i < page*10; i++) {
-        pageList.push(<SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>)
+      for (let i = (page-1)*10;i<page*10;++i) {
+        pushList.push(<SearchInfoItem key={i}>{newList[i]}</SearchInfoItem>)
       }
     }
     if (focused || mouseEnter) {
       return (
-        <SearchInfo onMouseEnter={handleMouseEnter}
-        onMouseLeave ={handleMouseLeave}
+        <SearchInfo
+          onMouseEnter = { handleMouseEnter }
+          onMouseLeave = { handleMouseLeave }
         >
           <SearchInfoTitle>
             热门搜索
-            <SearchInfoSwitch onClick={()=>{handleChangePage(page,totalPage, this.spinIcon)}}>
+            <SearchInfoSwitch onClick ={()=>{handleChangePage(page, totalPage, this.spinIcon)}}>
               <svg className="icon spin"
-                   ref={(icon)=>{this.spinIcon = icon}}
+                   ref = {(spin)=>{this.spinIcon = spin}}
               >
                 <use xlinkHref="#icon-refresh"></use>
               </svg>换一批
@@ -91,7 +102,7 @@ class Header extends PureComponent {
           </SearchInfoTitle>
           <SearchInfoList>
             {
-              pageList
+              pushList
             }
           </SearchInfoList>
         </SearchInfo>
@@ -109,8 +120,9 @@ const mapStateToProps = (state) => {
       focused: state.getIn(['header','focused']),
       list: state.getIn(['header','list']),
       page: state.getIn(['header','page']),
-      totalPage: state.getIn(['header','totalPage']),
-      mouseEnter: state.getIn(['header','mouseEnter'])
+      totalPage: state.getIn(['header', 'totalPage']),
+      mouseEnter: state.getIn(['header','mouseEnter']),
+      login: state.getIn(['login','login'])
     }
   }
 
@@ -131,20 +143,23 @@ const mapDispatchToProps = (dispatch) => {
     handleMouseLeave () {
       dispatch(actionCreators.changeMouseLeave())
     },
-    handleChangePage (page, totalPage, spinIcon) {
-      let originAngle = spinIcon.style.transform.replace(/[^0-9]/ig,'')
+    handleChangePage (page, totalPage, spin) {
+      let originAngle = spin.style.transform.replace(/[^0-9]/ig,'')
       if (originAngle) {
         originAngle = parseInt(originAngle, 10)
       }
       else {
         originAngle = 0
       }
-      spinIcon.style.transform = `rotate(${originAngle + 360}deg)`
-      if (page < totalPage) {
-        dispatch(actionCreators.changePage(page + 1))
+      spin.style.transform = `rotate(${originAngle+360}deg)`
+      if ( page < totalPage ) {
+        dispatch(actionCreators.changePage(page+1))
       } else {
         dispatch(actionCreators.changePage(1))
       }
+    },
+    logout () {
+      dispatch(loginActionCreators.logout())
     }
   }
 }

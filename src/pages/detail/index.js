@@ -1,0 +1,39 @@
+import React , { Component } from 'react'
+import {connect} from 'react-redux'
+import { actionCreators } from './store'
+import {
+  DetailWrapper,
+  Header,
+  Content
+} from "./style";
+
+class Detail extends Component {
+  render () {
+    return (
+      <DetailWrapper>
+        <Header>
+          {this.props.title}
+        </Header>
+        <Content dangerouslySetInnerHTML={{__html:this.props.content}}>
+        </Content>
+      </DetailWrapper>
+    )
+  }
+  componentDidMount () {
+    this.props.getDetail(this.props.match.params.id)
+  }
+
+}
+
+const mapStateToProps = (state) => ({
+  content: state.getIn(['detail','content']),
+  title: state.getIn(['detail','title'])
+})
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getDetail (id) {
+      dispatch(actionCreators.changeArticleDetail(id))
+    }
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Detail)
